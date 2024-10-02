@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load staticfiles %}
+
+{% block content %}
+<div class="alert  alert-dismissible fade show mb-0" style="padding-bottom: 0.5rem ;" id="alert-box" role="alert">
+
+</div>
+<h3>Test Name - {{ quiz.quizname }}</h3>
+<p>Number of Questions - <span id="question-count">{{quiz.question_set.count }}</span> </p>
+<form method="post" style="width: 80%;" id='formdata'>
+    {% csrf_token %}
+    {{questionform|crispy}}
+    <button type="submit" class="btn btn-primary mt-2">Add Question</button>
+</form>
+
+{% endblock content %}
+
+{% block extra_scripts %}
+<script type="text/javascript">
+    var question_form = document.getElementById("formdata");
+    question_form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        question = document.getElementById("id_question").value;
+        answer = document.getElementById("id_answer").value
+        option1 = document.getElementById("id_option1").value
+        option2 = document.getElementById("id_option2").value
+        option3 = document.getElementById("id_option3").value
+        option4 = document.getElementById("id_option4").value
+        marks = document.getElementById("id_marks").value
+
+        const formData = new FormData();
+
+        formData.append('question', question);
+        formData.append('answer', answer);
+        formData.append('option1', option1);
+        formData.append('option2', option2);
+        formData.append('option3', option3);
+        formData.append('option4', option4);
+        formData.append('marks', marks);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        formData.append('quiz_id', '{{ quiz.id }}');
+
+        console.log(formData);
+
+        fetch('{% url "quiz:add_question" quiz_id=quiz.id %}', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                if (data['code'] == 2) {
+                    throw Error(data['msg'])
+                }
+                var qcount = document.getElementById("question-count");
+                qcount.innerText = Number(qcount.innerText) + 1;
+                var abox = document.getElementById("alert-box");
+                abox.classList.add("alert-primary");
+                abox.innerHTML = '<p>Question Added Successfully<p> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'
+                question_form.reset();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                var abox = document.getElementById("alert-box");
+                abox.classList.add("alert-danger");
+                abox.innerHTML = '<p>' + error + '<p><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'
+            });
+    });
+</script>
+{% endblock extra_scripts %}

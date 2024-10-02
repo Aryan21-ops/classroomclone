@@ -1,0 +1,155 @@
+{% extends "group/group_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block style %}
+<style>
+	.form-control {
+		border: 2px inset #ced4da;
+	}
+</style>
+
+{% endblock %}
+
+{% block pregroup %}
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Create A MCQ-based Test</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" id="quiz-form">
+				<form action="{% url 'quiz:create_quiz' group.id %}" method="POST">
+					{{form.error}}
+					{% csrf_token %}
+					{{quizform|crispy}}
+
+
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<input type="submit" value="Create Test" class="btn btn-primary">
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- <div class="row" style="box-shadow: 1px 1px 3px #888888;">
+	<h2></h2>
+</div> -->
+<div class="accordion" id="GroupDescription">
+	<div class="accordion-item">
+		<h1 class="accordion-header" id="headingOne">
+
+			<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+				aria-expanded="false" aria-controls="collapseOne">
+				<strong>{{group.name|title}}</strong>
+			</button>
+		</h1>
+		<div id="collapseOne" class="accordion-collapse collapse " aria-labelledby="headingOne"
+			data-bs-parent="#GroupDescription">
+			<div class="accordion-body ">
+				<p>{{group.description}}</p>
+				<p>Members : {{group.members.count}}</p>
+				<h6>Group code : {{ group.code }}</h6>
+				{% if user in group.members.all %}
+				<a href="{% url 'group:leave' slug=group.slug %}" class="btn  btn-warning float-end px-5">Leave</a>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+<div class="">
+
+</div>
+{% if user == group.creator %}
+<div class="row justify-content-start my-3">
+	<div class="col-md-2">
+		<a type="button" href="{% url 'assignment:create-assignment' slug=group.slug %}"
+			class="btn btn-outline-secondary">
+			Create assignment
+		</a>
+	</div>
+	<div class="col-md-2">
+		<!-- Button trigger modal -->
+		<button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+			Create MCQ Test
+		</button>
+	</div>
+</div>
+{% endif %}
+
+<div class="row my-2">
+
+	{% if not user in group.members.all %}
+	<a href="{% url 'group:join' slug=group.slug %}" class="btn px-4 btn-warning">Join</a>
+	{% endif %}
+</div>
+
+
+
+
+{% endblock %}
+
+
+{% block group_content %}
+<div class="row">
+	<div class="col-md-8 mt-5">
+
+		<form method="post">
+			{% csrf_token %}
+			{{ postform.as_p}}
+			<input type="submit" class="btn btn-primary px-4 " value="Post">
+		</form>
+
+		{% if group.groups_posts.count == 0 %}
+		<h2>No posts in this group yet!</h2>
+
+		{% else %}
+
+		{% for post in group.group_posts.all %}
+		{% include "post/_post.html" %}
+		{% endfor %}
+
+		{% endif %}
+	</div>
+	<div class="col-md-4">
+
+		{% if group.group_quiz.count == 0 %}
+		<p>No quiz available</p>
+		{% else %}
+		<div class="list-group ">
+			<p style="text-align: center;"><strong> Quiz Tests:</strong></p>
+			{% for quizes in group.group_quiz.all %}
+			<a href="{% url 'quiz:quiztest' quiz_id=quizes.id group_slug=group.slug %}"
+				class="list-group-item list-group-item-action">{{quizes.quizname}}</a>
+			{% endfor %}
+		</div>
+		{% endif %}
+		{% if group.group_quiz.count == 0 %}
+		<p>No quiz available</p>
+		{% else %}
+		<div class="list-group ">
+			<p style="text-align: center;"><strong> Assignments:</strong></p>
+			{% for assignment in group.group_assignment.all %}
+			
+			
+			<a href="{% url 'assignment:assignment-detail'  assignment_slug=assignment.slug %}"
+				class="list-group-item list-group-item-action">{{assignment.title}}</a>
+				
+			
+				
+				<p>{{assignment.title}}</p>
+			{% endfor %}
+		</div>
+		{% endif %}
+	</div>
+
+</div>
+
+{% endblock %}

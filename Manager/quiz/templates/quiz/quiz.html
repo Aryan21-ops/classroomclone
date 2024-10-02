@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-10 bshadow p-3">
+        <h3>{{quiz.quizname|title}}</h3>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Id architecto aliquid in repudiandae vitae eaque
+            deleniti optio vel praesentium rem quod, quisquam error pariatur, culpa fuga, laudantium voluptatibus animi
+            ipsa labore velit? Nostrum, deleniti tempore eaque incidunt placeat soluta, nemo in fugiat quos maiores
+            mollitia, nihil itaque natus nobis nam.</p>
+        {% if not quiz.description == None %}
+        <p>{{quiz.description}}</p>
+        {% endif %}
+        <button class="btn btn-warning px-3 mt-3" style="color:white;" id="start-test" type="submit"
+            onclick="quizstart()">Start
+            Test</button>
+
+    </div>
+
+</div>
+
+<div class="row mt-3" id="rhide" style="display: none;">
+    <div class="col-md-10 bshadow p-3">
+        <div id="vue-app">
+            <form @submit.prevent.once="handleSubmit()" id="submit-form">
+                <div v-for="(question, index) in question_set" class='mt-2'>
+                    <p class='mb-0'>[[index+1]]. [[question.question]] </p>
+
+                    {% comment %}
+                    <a :data-ques-id=[[question.question_id]]
+                        href="'/update_question/quiz.id/' + [[question.question_id]] + '/'">update</a>
+
+                    {% endcomment %}
+
+                    <div v-for="(option, i) in question.options" class="ms-3">
+                        <!-- v-on:change="checkanswer(index,i)" -->
+                        <input type="radio" :value="option" :data-index="i" :name="'option-'+index">
+                        [[option]]
+                    </div>
+
+                </div>
+                <button type="submit" class="btn btn-primary mt-4">Submit</button>
+            </form>
+        </div>
+    </div>
+
+
+</div>
+
+
+{% endblock content %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+<script>
+    function quiztimer() {
+        console.log('submit');
+        document.getElementById('submit-form').requestSubmit();
+
+    }
+    function quizstart() {
+        var sbut = document.getElementById('start-test');
+        sbut.style.display = 'none';
+        var disquestion = document.getElementById('rhide');
+        disquestion.style.removeProperty('display');
+        setTimeout(quiztimer, 1000);
+
+    }
+
+    var app = new Vue({
+        delimiters: ["[[", "]]"],
+        el: '#vue-app',
+        data: {
+            quiz_id: '{{quiz.id}}',
+            quizname: '{{quiz.quizname}}',
+            question_set: [],
+            solutions: [],
+            user: '{{request.user}}',
+            group_id: '{{group.id}}'
+
+        },
+        methods: {
+
+            handleSubmit() {
+                for (i in this.question_set) {
+
+                    var sValue = document.querySelector('input[name="option-' + i + '"]:checked')
+                    if (sValue != null) {
+                        solution = {
+                            'question_id': this.question_set[i].question_id,
+                            'user_response': sValue.dataset.index
+                        }
+                        this.solutions.push(solution)
+                    }
+
+                }
+
+                fetch(`/quiz/api/${this.quiz_id}/marks/`, {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        solutions: this.solutions,
+                        user: this.user,
+                        quiz_id: this.quiz_id,
+                        group_id: this.group_id
+                    })
+                })
+                    .then(res => res.json())
+                    .then(result => {
+                        console.log(result)
+                    })
+            },
+            // checkanswer(question_index, option_index) {
+            //     var question = this.question_set[question_index]
+            //     solution = {
+            //         'question_id': question.question_id,
+            //         'user_response': option_index
+            //     }
+            //     this.solutions.push(solution)
+
+            // }
+
+        },
+        mounted() {
+
+            fetch(`/quiz/api/${this.quizname}/`)
+                .then(res => res.json())
+                .then(result => {
+                    this.question_set = result;
+                    console.log(this.question_set);
+                })
+        }
+
+    })
+</script>
+{% endblock extra_scripts %}

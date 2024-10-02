@@ -1,0 +1,31 @@
+{% extends "post/post_base.html" %}
+
+
+{% block pre_post_content %}
+<div class="col-md-4">
+	{% if request.user.is_authenticated %}
+	<div >
+		<div >
+			<h5 >Your Class</h5>
+			<ul >
+				{# {% get_user_group as user_class %}#}
+				{% for member_class in user_class %}
+				<li>
+					<a href="{% url 'group:class_single' slug=member_class.group.slug %}">{{ member_class.group.name }}</a>
+				</li>
+				{% endfor %}
+
+			</ul>
+		</div>
+	</div>
+	{% endif %}
+	
+</div>
+{% endblock %}
+{% block post_content %}
+<div class="col-md-8">
+	{% for post in post_list %}
+  {% include "post/_post.html" %}
+	{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "group/group_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block user_nav %}
+<a class="mx-3 mt-1 " style="text-decoration: none;" href="{% url 'group:create_group' %}">Create Class</a>
+<!-- Button trigger modal -->
+<a style="color:rgb(49, 49, 247);cursor: pointer;margin-top: 0.3rem;text-decoration: none;" class="mx-3"
+	data-bs-toggle="modal" data-bs-target="#join-class">
+	Join class
+</a>
+
+<!-- Modal -->
+<div class="modal fade" id="join-class" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Join Class</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form action="{% url 'group:join-with-code' %}" method="post">
+					{% csrf_token %}
+					{{form|crispy}}
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-outline-warning px-4">Join</button>
+					</div>
+				</form>
+			</div>
+
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+
+
+
+{% block pregroup %}
+<div class="col-md-4">
+	<div class="content">
+		{% if user.is_authenticated %}
+		<h4>Your Classes</h4>
+
+		{% endif %}
+
+
+	</div>
+
+</div>
+{% endblock %}
+
+{% block group_content %}
+<div class="col-md-8">
+	<div class="list-group">
+		{% for group in object_list %}
+		<a class="list-group-item mt-4" href="{% url 'group:class_single' slug=group.slug %}"
+			style="box-shadow: 1px 1px 3px #888888;border: 2px rgb(109, 109, 247) solid;">
+			<h3 class="title list-group-item-heading">{{ group.name|title }}</h3>
+			<div class="list-group-item-text container-fluid">
+				{{ group.description_html|safe }}
+				<div class="row">
+					<div class="col-md-2">
+						<span class="badge rounded-pill bg-warning"> {{ group.members.count }} member</span>
+					</div>
+					<div class="col-md-2">
+						<span class="badge rounded-pill bg-info"> {{ group.group_posts.all.count }} post</span>
+					</div>
+				</div>
+			</div>
+		</a>
+		{% endfor %}
+	</div>
+</div>
+{% endblock %}

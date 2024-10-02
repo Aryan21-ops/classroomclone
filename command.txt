@@ -1,0 +1,66 @@
+
+#Reference : https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/
+
+1. For Build & Run the container with prod docker file
+docker-compose -f docker-compose.prod.yml up -d --build
+
+2. For creating db on postgress
+docker-compose -f docker-compose.prod.yml exec db psql --username=postgres --dbname=Assignment_Manager
+
+3. For running the migrations
+docker-compose -f docker-compose.prod.yml exec web python manage.py migrate --noinput
+
+4. For creating superuser
+docker-compose -f docker-compose.prod.yml exec web python manage.py createsuperuser
+
+5. Application running, Open browser and check the logs in the new terminal
+docker-compose logs -f
+
+``````````````````````````````````````````````````````````````````````````````````````````````````````````````
+Commands
+--------------
+
+Postgress command
+-------------------------
+
+docker-compose -f docker-compose.prod.yml exec db psql --username=postgres --dbname=Assignment_Manager
+
+Assignment_Manager=# \l
+output: list of database
+
+Assignment_Manager=# \c hello_django_dev
+Output: You are now connected to database "hello_django_dev" as user "hello_django".
+
+Assignment_Manager=# \dt
+Output: List of relations
+
+Assignment_Manager=# \q
+Output: quit
+
+-----------------------------------------------------------------------------------------------------------------
+
+Docker command
+-------------------------
+
+Build the image:
+$ docker-compose build
+
+Once the image is built, run the container:
+$ docker-compose up -d
+
+For logs
+$ docker-compose logs -f
+
+Stop the container
+- docker-compose down 
+
+Build the new image and spin up the two containers:
+- docker-compose up -d --build
+
+after the containers spin up, Run the migrations:
+$ docker-compose exec web python manage.py flush --no-input
+$ docker-compose exec web python manage.py migrate --noinput
+
+Ensure the default Django tables were created:
+$ docker-compose exec db psql --username=postgres --dbname=Assignment_Manager
+

@@ -1,0 +1,48 @@
+{% extends "post/post_base.html" %}
+{% load crispy_forms_tags %}
+{% block post_content %}
+<div class="col-md-8">
+    <div class="card  mt-4">
+        <div class="card-body bg-light">
+            <h4 class="card-title"><strong>{{ post.user.username }}</strong></h4>
+
+            <p class="card-text">{{ post.message }}</p>
+            <h6 class="card-subtitle mb-2 text-muted">{{ post.created_at }}</h2>
+
+                <div class="card-footer" style="padding: 0%; margin-bottom: 0%;">
+
+                    {% if post.user == user %}
+                    <a href="{% url 'post:post_delete' pk=post.pk %}" title="delete" class="btn btn-simple">
+                        <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
+                        <span class="text-danger icon-label">Delete</span>
+                    </a>
+                    {% endif %}
+
+
+
+
+                </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-8 mt-4">
+    <form method="post">
+        {% csrf_token %}
+        {{ commentform|crispy }}
+        <input type="submit" value="Ask Your Doubt" class="btn btn-warning mt-3">
+    </form>
+
+    <div class="col-md-8 mt-4">
+        {% if post.comments.count >= 0 %}
+        <h4>Comments:</h4>
+        <div class="list-group  ms-3">
+
+            {% for comment in post.comments.all %}
+            <li class="list-group-item list-group-item-action mt-2">{{comment.message}}</li>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

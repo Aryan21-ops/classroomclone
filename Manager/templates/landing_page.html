@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+
+{% block content %}
+
+<section>
+    <div>
+        <div>
+            <h1>Move Your Class Online </h1>
+            <div>
+                <ul>
+                    <li>Give updates about Class</li>
+                    <li>Assign Work</li>
+                    <li>Easily Handle the Assigned Work</li>
+                </ul>
+
+                <a href="{% url 'group:create_group' %}"> Create</a>
+            </div>
+        </div>
+        <div></div>
+        <div>
+            <h1> Join your online classes</h1>
+            <ul>
+                <li>Learn and Grow</li>
+                <li>xxxxx</li>
+            </ul>
+            <a href="#"> Join Class</a>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}
